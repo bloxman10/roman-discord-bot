@@ -5,11 +5,15 @@ from config import (
     EMBASSY_STAFF_ROLE_ID
 )
 
+from utils.config_manager import load_config
+
+
 
 class EmbassyButton(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
+
 
 
     @discord.ui.button(
@@ -34,7 +38,6 @@ class EmbassyButton(discord.ui.View):
                 "❌ This button can only be used in a server.",
                 ephemeral=True
             )
-
             return
 
 
@@ -58,7 +61,6 @@ class EmbassyButton(discord.ui.View):
                 f"❌ You already have an embassy room: {existing.mention}",
                 ephemeral=True
             )
-
             return
 
 
@@ -66,6 +68,7 @@ class EmbassyButton(discord.ui.View):
         category = guild.get_channel(
             EMBASSY_CATEGORY_ID
         )
+
 
         staff_role = guild.get_role(
             EMBASSY_STAFF_ROLE_ID
@@ -78,7 +81,6 @@ class EmbassyButton(discord.ui.View):
                 "❌ Embassy category is not configured correctly.",
                 ephemeral=True
             )
-
             return
 
 
@@ -88,8 +90,17 @@ class EmbassyButton(discord.ui.View):
                 "❌ Embassy staff role is not configured correctly.",
                 ephemeral=True
             )
-
             return
+
+
+
+        # Load extra ticket access roles
+        config = load_config()
+
+        ticket_roles = config.get(
+            "ticket_roles",
+            []
+        )
 
 
 
@@ -109,6 +120,7 @@ class EmbassyButton(discord.ui.View):
                 ),
 
 
+            # Main embassy staff role gets access
             staff_role:
                 discord.PermissionOverwrite(
                     view_channel=True,
@@ -116,6 +128,21 @@ class EmbassyButton(discord.ui.View):
                     read_message_history=True
                 )
         }
+
+
+
+        # Add extra access roles (no ping)
+        for role_id in ticket_roles:
+
+            role = guild.get_role(role_id)
+
+            if role:
+
+                overwrites[role] = discord.PermissionOverwrite(
+                    view_channel=True,
+                    send_messages=True,
+                    read_message_history=True
+                )
 
 
 
@@ -134,7 +161,6 @@ class EmbassyButton(discord.ui.View):
                 "❌ I don't have permission to create channels.",
                 ephemeral=True
             )
-
             return
 
 
@@ -149,7 +175,7 @@ class EmbassyButton(discord.ui.View):
         embed = discord.Embed(
             title="🤝 Embassy Opened",
             description=(
-                f"Welcome {member.mention}.\n\n"
+                "Welcome!\n\n"
                 "Please provide the following information:"
             ),
             color=discord.Color.blue()
@@ -159,7 +185,7 @@ class EmbassyButton(discord.ui.View):
         embed.add_field(
             name="Required Information",
             value=(
-                "• Alliance name\n"
+                "• Nation link\n"
                 "• Your position\n"
                 "• Reason for contacting us\n"
                 "• Any additional details"
@@ -173,6 +199,8 @@ class EmbassyButton(discord.ui.View):
         )
 
 
+
+        # Only EMBASSY_STAFF_ROLE_ID gets pinged
         await channel.send(
             content=(
                 f"{member.mention} "

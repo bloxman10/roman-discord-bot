@@ -5,11 +5,15 @@ from config import (
     APPLICATION_STAFF_ROLE_ID
 )
 
+from utils.config_manager import load_config
+
+
 
 class ApplyButton(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
+
 
 
     @discord.ui.button(
@@ -34,7 +38,6 @@ class ApplyButton(discord.ui.View):
                 "❌ This button can only be used in a server.",
                 ephemeral=True
             )
-
             return
 
 
@@ -58,7 +61,6 @@ class ApplyButton(discord.ui.View):
                 f"❌ You already have an application open: {existing.mention}",
                 ephemeral=True
             )
-
             return
 
 
@@ -66,6 +68,7 @@ class ApplyButton(discord.ui.View):
         category = guild.get_channel(
             APPLICATION_CATEGORY_ID
         )
+
 
         staff_role = guild.get_role(
             APPLICATION_STAFF_ROLE_ID
@@ -78,7 +81,6 @@ class ApplyButton(discord.ui.View):
                 "❌ Application category is not configured correctly.",
                 ephemeral=True
             )
-
             return
 
 
@@ -88,8 +90,17 @@ class ApplyButton(discord.ui.View):
                 "❌ Application staff role is not configured correctly.",
                 ephemeral=True
             )
-
             return
+
+
+
+        # Load extra ticket access roles
+        config = load_config()
+
+        ticket_roles = config.get(
+            "ticket_roles",
+            []
+        )
 
 
 
@@ -109,6 +120,7 @@ class ApplyButton(discord.ui.View):
                 ),
 
 
+            # Main ping staff role also gets access
             staff_role:
                 discord.PermissionOverwrite(
                     view_channel=True,
@@ -116,6 +128,21 @@ class ApplyButton(discord.ui.View):
                     read_message_history=True
                 )
         }
+
+
+
+        # Add extra roles from JSON
+        for role_id in ticket_roles:
+
+            role = guild.get_role(role_id)
+
+            if role:
+
+                overwrites[role] = discord.PermissionOverwrite(
+                    view_channel=True,
+                    send_messages=True,
+                    read_message_history=True
+                )
 
 
 
@@ -134,7 +161,6 @@ class ApplyButton(discord.ui.View):
                 "❌ I don't have permission to create channels.",
                 ephemeral=True
             )
-
             return
 
 
@@ -149,47 +175,22 @@ class ApplyButton(discord.ui.View):
         embed = discord.Embed(
             title="🏛️ Empire of the Romans Application",
             description=(
-                f"Welcome {member.mention}!\n\n"
-                "Please answer the questions below."
+                "**Welcome!**\n\n"
+                "Glad to see that you are interested in applying to "
+                "**Empire of the Romans**.\n\n"
+                "When you have about **5 to 10 minutes** of free time, "
+                "kindly use the **/interview_start** command to begin a short interview."
             ),
             color=discord.Color.gold()
         )
 
 
         embed.add_field(
-            name="1️⃣ Nation Link",
+            name="Interview Process",
             value=(
-                "Send your Politics & War nation link."
-            ),
-            inline=False
-        )
-
-
-        embed.add_field(
-            name="2️⃣ Nation Information",
-            value=(
-                "Cities:\n"
-                "Nation age:\n"
-                "Current score:"
-            ),
-            inline=False
-        )
-
-
-        embed.add_field(
-            name="3️⃣ Previous Alliances",
-            value=(
-                "List your previous alliances "
-                "and positions."
-            ),
-            inline=False
-        )
-
-
-        embed.add_field(
-            name="4️⃣ Why Empire of the Romans?",
-            value=(
-                "Explain why you want to join."
+                "You will be asked a few questions about your nation, "
+                "experience, and interest in joining Rome.\n\n"
+                "Please answer honestly and provide as much detail as possible."
             ),
             inline=False
         )
@@ -200,6 +201,8 @@ class ApplyButton(discord.ui.View):
         )
 
 
+
+        # Only APPLICATION_STAFF_ROLE_ID is pinged
         await channel.send(
             content=(
                 f"{member.mention} "

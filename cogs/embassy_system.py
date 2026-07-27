@@ -24,23 +24,10 @@ class EmbassySystem(commands.Cog):
         embed = discord.Embed(
             title="🤝 Empire of the Romans Embassy",
             description=(
-                "Welcome diplomats.\n\n"
                 "Click the button below to open an embassy room "
                 "with our Foreign Affairs team."
             ),
             color=discord.Color.blue()
-        )
-
-
-        embed.add_field(
-            name="Embassy Requests",
-            value=(
-                "• Alliance diplomacy\n"
-                "• Treaty discussions\n"
-                "• Foreign affairs communication\n"
-                "• Diplomatic inquiries"
-            ),
-            inline=False
         )
 
 

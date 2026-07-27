@@ -1,4 +1,5 @@
 import discord
+
 from discord.ext import commands
 from discord import app_commands
 
@@ -11,9 +12,10 @@ class FAWelcome(commands.Cog):
         self.bot = bot
 
 
+
     @app_commands.command(
         name="setup_fawelcome",
-        description="Set the FA server welcome channel"
+        description="Set the Foreign Affairs welcome channel"
     )
     @app_commands.describe(
         channel="Channel where FA welcome messages will be sent"
@@ -27,13 +29,16 @@ class FAWelcome(commands.Cog):
         config = load_config()
 
         config["fa_welcome_channel"] = channel.id
+        config["fa_server_id"] = interaction.guild.id
 
         save_config(config)
 
+
         await interaction.response.send_message(
-            f"✅ FA welcome messages will now be sent in {channel.mention}",
+            f"✅ Foreign Affairs welcome channel set to {channel.mention}",
             ephemeral=True
         )
+
 
 
     @commands.Cog.listener()
@@ -44,59 +49,65 @@ class FAWelcome(commands.Cog):
 
         config = load_config()
 
+
+        # Stop main server from sending FA welcome
+        if member.guild.id != config.get("fa_server_id"):
+            return
+
+
+
         channel_id = config.get(
             "fa_welcome_channel"
         )
 
-        if channel_id is None:
+
+        if not channel_id:
             return
+
 
 
         channel = self.bot.get_channel(
             channel_id
         )
 
+
         if channel is None:
             return
 
 
+
         embed = discord.Embed(
-            title="🤝 Welcome to the Empire of the Romans Embassy",
             description=(
-                f"Welcome, {member.mention}!\n\n"
-                "This server is the official Foreign Affairs "
-                "hub of the **Empire of the Romans**.\n\n"
-                "We use this server for diplomatic communication, "
-                "treaty discussions, and alliance relations."
+                "**Welcome!**\n\n"
+                "Welcome to the **Empire of the Romans Foreign Affairs** server.\n\n"
+
+                "If you are here for diplomacy, treaty discussions, embassies, "
+                "or other diplomatic matters, our Foreign Affairs team will assist you shortly.\n\n"
+
+                "To contact us, please create an embassy using the embassy button "
+                "or wait for a member of the FA team.\n\n"
+
+                "Ave Roma!"
             ),
             color=discord.Color.blue()
         )
 
 
-        embed.add_field(
-            name="🏛️ Embassy Guidelines",
-            value=(
-                "• Please identify yourself\n"
-                "• State your alliance and position\n"
-                "• Contact Foreign Affairs staff if needed"
-            ),
-            inline=False
-        )
-
-
-        embed.add_field(
-            name="📜 Diplomacy",
-            value=(
-                "We welcome all diplomatic visitors "
-                "and look forward to productive relations."
-            ),
-            inline=False
+        embed.set_author(
+            name=member.display_name,
+            icon_url=member.display_avatar.url
         )
 
 
         embed.set_thumbnail(
-            url=member.display_avatar.url
+            url=config["welcome_logo"]
         )
+
+
+        embed.set_image(
+            url=config["welcome_banner"]
+        )
+
 
         embed.set_footer(
             text="Empire of the Romans • Foreign Affairs"
@@ -104,9 +115,16 @@ class FAWelcome(commands.Cog):
 
 
         await channel.send(
+            content=member.mention,
             embed=embed
         )
 
 
+
 async def setup(bot):
-    await bot.add_cog(FAWelcome(bot))
+
+    await bot.add_cog(
+        FAWelcome(bot)
+    )
+
+    print("✅ FA Welcome loaded")

@@ -24,36 +24,25 @@ class ApplySystem(commands.Cog):
         embed = discord.Embed(
             title="🏛️ Join Empire of the Romans",
             description=(
-                "Interested in joining our alliance?\n\n"
-                "Click the button below to start your application."
-            ),
+                            "Click the button below to apply to join the **Empire of the Romans**.\n\n"
+                        ),
             color=discord.Color.gold()
         )
 
-        embed.add_field(
-            name="Application Requirements",
-            value=(
-                "• Nation link\n"
-                "• Activity level\n"
-                "• Previous alliances\n"
-                "• Reason for joining"
-            ),
-            inline=False
-        )
+
+
 
         embed.set_footer(
-            text="Empire of the Romans"
+            text="Empire of the Romans Recruitment"
         )
 
 
-        # Public message
         await interaction.channel.send(
             embed=embed,
             view=ApplyButton()
         )
 
 
-        # Private confirmation
         await interaction.response.send_message(
             "✅ Application message created.",
             ephemeral=True
@@ -61,4 +50,6 @@ class ApplySystem(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(ApplySystem(bot))
+    await bot.add_cog(
+        ApplySystem(bot)
+    )

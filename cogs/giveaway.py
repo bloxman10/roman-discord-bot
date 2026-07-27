@@ -1,8 +1,9 @@
 import discord
 import time
 import re
+import random
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands
 
 from views.giveaway_view import GiveawayView
@@ -10,35 +11,45 @@ from views.giveaway_view import GiveawayView
 from utils.giveaway_manager import (
     add_giveaway,
     get_giveaway,
-    remove_giveaway
+    remove_giveaway,
+    get_active_giveaways,
+    update_giveaway
 )
+
 
 
 def parse_time(duration: str):
 
-    match = re.match(r"(\d+)([mhd])", duration.lower())
+    match = re.match(
+        r"(\d+)([mhd])",
+        duration.lower()
+    )
 
     if not match:
         return None
 
+
     amount = int(match.group(1))
     unit = match.group(2)
+
 
     if unit == "m":
         return amount * 60
 
     if unit == "h":
-        return amount * 60 * 60
+        return amount * 3600
 
     if unit == "d":
-        return amount * 60 * 60 * 24
+        return amount * 86400
 
 
 
 class Giveaway(commands.GroupCog, name="giveaway"):
 
     def __init__(self, bot):
+
         self.bot = bot
+        self.check_giveaways.start()
 
 
 
@@ -47,10 +58,10 @@ class Giveaway(commands.GroupCog, name="giveaway"):
         description="Create a giveaway"
     )
     @app_commands.describe(
-        prize="What is the prize?",
+        prize="Giveaway prize",
         duration="Example: 30m, 2h, 3d",
         winners="Number of winners",
-        channel="Where to post the giveaway"
+        channel="Channel to send giveaway"
     )
     async def create(
         self,
@@ -61,13 +72,14 @@ class Giveaway(commands.GroupCog, name="giveaway"):
         channel: discord.TextChannel
     ):
 
+
         seconds = parse_time(duration)
 
 
         if not seconds:
 
             await interaction.response.send_message(
-                "❌ Invalid time format. Use 30m, 2h, 3d",
+                "❌ Invalid duration.",
                 ephemeral=True
             )
 
@@ -78,6 +90,7 @@ class Giveaway(commands.GroupCog, name="giveaway"):
         end_time = int(time.time()) + seconds
 
 
+
         embed = discord.Embed(
             title="🎉 GIVEAWAY 🎉",
             color=discord.Color.gold()
@@ -85,43 +98,40 @@ class Giveaway(commands.GroupCog, name="giveaway"):
 
 
         embed.add_field(
-            name="Prize",
+            name="🎁 Prize",
             value=prize,
             inline=False
         )
 
 
         embed.add_field(
-            name="Hosted by",
-            value=interaction.user.mention,
-            inline=True
+            name="👑 Host",
+            value=interaction.user.mention
         )
 
 
         embed.add_field(
-            name="Ends",
-            value=f"<t:{end_time}:R>",
-            inline=True
+            name="⏰ Ends",
+            value=f"<t:{end_time}:R>"
         )
 
 
         embed.add_field(
-            name="Winners",
-            value=str(winners),
-            inline=True
+            name="🏆 Winners",
+            value=str(winners)
         )
 
 
         embed.add_field(
-            name="Entries",
-            value="0",
-            inline=True
+            name="👥 Entries",
+            value="0"
         )
 
 
         embed.set_footer(
-            text="React using the button below to enter!"
+            text="Press the button below to enter!"
         )
+
 
 
         message = await channel.send(
@@ -129,24 +139,31 @@ class Giveaway(commands.GroupCog, name="giveaway"):
         )
 
 
-        giveaway_data = {
+
+        data = {
 
             "message_id": message.id,
             "channel_id": channel.id,
             "guild_id": interaction.guild.id,
+
             "prize": prize,
+
             "host_id": interaction.user.id,
+
             "end_time": end_time,
+
             "winners": winners,
+
             "entries": [],
+
             "ended": False
 
         }
 
 
-        add_giveaway(
-            giveaway_data
-        )
+
+        add_giveaway(data)
+
 
 
         await message.edit(
@@ -156,6 +173,7 @@ class Giveaway(commands.GroupCog, name="giveaway"):
         )
 
 
+
         await interaction.response.send_message(
             "✅ Giveaway created!",
             ephemeral=True
@@ -163,12 +181,73 @@ class Giveaway(commands.GroupCog, name="giveaway"):
 
 
 
+
+    @app_commands.command(
+        name="list",
+        description="List active giveaways"
+    )
+    @app_commands.checks.has_permissions(
+        administrator=True
+    )
+    async def list(
+        self,
+        interaction: discord.Interaction
+    ):
+
+
+        giveaways = get_active_giveaways()
+
+
+
+        if not giveaways:
+
+            await interaction.response.send_message(
+                "❌ No active giveaways.",
+                ephemeral=True
+            )
+
+            return
+
+
+
+        embed = discord.Embed(
+            title="🎉 Active Giveaways",
+            color=discord.Color.gold()
+        )
+
+
+        for giveaway in giveaways:
+
+
+            embed.add_field(
+
+                name=f"{giveaway['prize']}",
+
+                value=(
+
+                    f"ID: `{giveaway['message_id']}`\n"
+                    f"Ends: <t:{giveaway['end_time']}:R>\n"
+                    f"Entries: {len(giveaway['entries'])}"
+
+                ),
+
+                inline=False
+            )
+
+
+
+        await interaction.response.send_message(
+            embed=embed,
+            ephemeral=True
+        )
+
+
+
+
+
     @app_commands.command(
         name="remove",
         description="Remove a giveaway"
-    )
-    @app_commands.describe(
-        message_id="Giveaway message ID"
     )
     @app_commands.checks.has_permissions(
         administrator=True
@@ -209,7 +288,7 @@ class Giveaway(commands.GroupCog, name="giveaway"):
             await message.delete()
 
 
-        except Exception:
+        except:
 
             pass
 
@@ -220,6 +299,7 @@ class Giveaway(commands.GroupCog, name="giveaway"):
         )
 
 
+
         await interaction.response.send_message(
             "✅ Giveaway removed.",
             ephemeral=True
@@ -227,8 +307,138 @@ class Giveaway(commands.GroupCog, name="giveaway"):
 
 
 
+
+
+    @tasks.loop(seconds=15)
+    async def check_giveaways(self):
+
+
+        giveaways = get_active_giveaways()
+
+
+        now = int(time.time())
+
+
+        for giveaway in giveaways:
+
+
+            if giveaway["end_time"] > now:
+                continue
+
+
+
+            guild = self.bot.get_guild(
+                giveaway["guild_id"]
+            )
+
+
+            if not guild:
+                continue
+
+
+
+            channel = guild.get_channel(
+                giveaway["channel_id"]
+            )
+
+
+            if not channel:
+                continue
+
+
+
+            winners = giveaway["winners"]
+
+            entries = giveaway["entries"]
+
+
+
+            if not entries:
+
+
+                await channel.send(
+
+                    f"🎉 Giveaway ended!\n\n"
+                    f"Prize: **{giveaway['prize']}**\n\n"
+                    "❌ Nobody entered the giveaway."
+
+                )
+
+
+            else:
+
+
+                selected = random.sample(
+
+                    entries,
+
+                    min(
+                        winners,
+                        len(entries)
+                    )
+
+                )
+
+
+                mentions = " ".join(
+
+                    f"<@{x}>"
+
+                    for x in selected
+
+                )
+
+
+                await channel.send(
+
+                    f"🎉 Giveaway ended!\n\n"
+                    f"🏆 Prize: **{giveaway['prize']}**\n"
+                    f"Congratulations {mentions}!"
+
+                )
+
+
+
+            try:
+
+                message = await channel.fetch_message(
+                    giveaway["message_id"]
+                )
+
+
+                await message.edit(
+                    view=None
+                )
+
+
+            except:
+
+                pass
+
+
+
+            giveaway["ended"] = True
+
+            update_giveaway(
+                giveaway
+            )
+
+
+
+    def cog_unload(self):
+
+        self.check_giveaways.cancel()
+
+
+
+
+
 async def setup(bot):
 
     await bot.add_cog(
         Giveaway(bot)
+    )
+
+    print(
+        "✅ Giveaway loaded"
     )
