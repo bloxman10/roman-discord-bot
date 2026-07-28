@@ -1,4 +1,5 @@
 import discord
+
 from discord.ext import commands
 from discord import app_commands
 
@@ -11,11 +12,14 @@ class EmbassySystem(commands.Cog):
         self.bot = bot
 
 
+
     @app_commands.command(
         name="setup_embassy",
         description="Create the embassy button message"
     )
-    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.checks.has_permissions(
+        administrator=True
+    )
     async def setup_embassy(
         self,
         interaction: discord.Interaction
@@ -36,21 +40,25 @@ class EmbassySystem(commands.Cog):
         )
 
 
-        # Public embassy message
         await interaction.channel.send(
             embed=embed,
             view=EmbassyButton()
         )
 
 
-        # Only the admin sees this
         await interaction.response.send_message(
             "✅ Embassy message created.",
             ephemeral=True
         )
 
 
+
 async def setup(bot):
+
     await bot.add_cog(
         EmbassySystem(bot)
+    )
+
+    print(
+        "✅ Embassy System loaded"
     )

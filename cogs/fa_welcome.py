@@ -50,7 +50,7 @@ class FAWelcome(commands.Cog):
         config = load_config()
 
 
-        # Stop main server from sending FA welcome
+        # Only allow FA server to trigger this welcome
         if member.guild.id != config.get("fa_server_id"):
             return
 
@@ -100,12 +100,12 @@ class FAWelcome(commands.Cog):
 
 
         embed.set_thumbnail(
-            url=config["welcome_logo"]
+            url=config.get("welcome_logo")
         )
 
 
         embed.set_image(
-            url=config["welcome_banner"]
+            url=config.get("welcome_banner")
         )
 
 
@@ -127,4 +127,6 @@ async def setup(bot):
         FAWelcome(bot)
     )
 
-    print("✅ FA Welcome loaded")
+    print(
+        "✅ FA Welcome loaded"
+    )

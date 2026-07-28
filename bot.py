@@ -59,6 +59,7 @@ COGS = [
     "cogs.reminders",
     "cogs.colosseum",
     "cogs.interview",
+    "cogs.help",
 ]
 
 

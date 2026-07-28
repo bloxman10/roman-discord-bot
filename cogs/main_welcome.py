@@ -43,7 +43,10 @@ class MainWelcome(commands.Cog):
 
         except Exception as e:
 
-            print(f"Welcome setup error: {e}")
+            print(
+                f"Welcome setup error: {e}"
+            )
+
 
             if interaction.response.is_done():
 
@@ -70,10 +73,9 @@ class MainWelcome(commands.Cog):
         config = load_config()
 
 
-        # Prevent FA server from triggering main welcome
+        # Only send in the configured main server
         if member.guild.id != config.get("main_server_id"):
             return
-
 
 
         channel_id = config.get(
@@ -83,7 +85,6 @@ class MainWelcome(commands.Cog):
 
         if not channel_id:
             return
-
 
 
         channel = self.bot.get_channel(
@@ -102,17 +103,17 @@ class MainWelcome(commands.Cog):
                 "Greetings! Welcome to the **Empire of the Romans**, "
                 "also known as **Imperium Romanum**.\n\n"
 
-                f"Please visit <#{config['verify_channel']}> and register with "
-                f"<@{config['locutus_user']}>.\n\n"
+                f"Please visit <#{config.get('verify_channel')}> and register with "
+                f"<@{config.get('locutus_user')}>.\n\n"
 
                 f"After verifying, please check out "
-                f"<#{config['info_channel']}> for more information about Rome.\n\n"
+                f"<#{config.get('info_channel')}> for more information about Rome.\n\n"
 
                 f"Join our Foreign Affairs server or contact "
-                f"<@{config['fa_contact']}> for all FA inquiries.\n\n"
+                f"<@{config.get('fa_contact')}> for all FA inquiries.\n\n"
 
                 f"To join Rome please go to "
-                f"<#{config['apply_channel']}> and press the application button.\n\n"
+                f"<#{config.get('apply_channel')}> and press the application button.\n\n"
 
                 "Thanks!"
             ),
@@ -127,12 +128,12 @@ class MainWelcome(commands.Cog):
 
 
         embed.set_thumbnail(
-            url=config["welcome_logo"]
+            url=config.get("welcome_logo")
         )
 
 
         embed.set_image(
-            url=config["welcome_banner"]
+            url=config.get("welcome_banner")
         )
 
 
@@ -154,4 +155,6 @@ async def setup(bot):
         MainWelcome(bot)
     )
 
-    print("✅ Main Welcome loaded")
+    print(
+        "✅ Main Welcome loaded"
+    )

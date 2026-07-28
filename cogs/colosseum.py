@@ -14,7 +14,7 @@ ATTACKS = [
     {
         "name": "Punch",
         "rarity": "Common",
-        "chance": 40,
+        "chance": 50,
         "damage": (5, 10)
     },
 
@@ -28,28 +28,28 @@ ATTACKS = [
     {
         "name": "Spear Thrust",
         "rarity": "Rare",
-        "chance": 15,
+        "chance": 12,
         "damage": (18, 28)
     },
 
     {
         "name": "Gladiator Strike",
         "rarity": "Epic",
-        "chance": 10,
+        "chance": 8,
         "damage": (28, 40)
     },
 
     {
         "name": "Godly Execution",
         "rarity": "Legendary",
-        "chance": 5,
+        "chance": 3,
         "damage": (40, 60)
     },
 
     {
         "name": "Critical Fury",
         "rarity": "Mythic",
-        "chance": 5,
+        "chance": 2,
         "damage": (60, 80)
     }
 

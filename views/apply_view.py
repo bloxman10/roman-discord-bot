@@ -1,19 +1,12 @@
 import discord
 
-from config import (
-    APPLICATION_CATEGORY_ID,
-    APPLICATION_STAFF_ROLE_ID
-)
-
 from utils.config_manager import load_config
-
 
 
 class ApplyButton(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
-
 
 
     @discord.ui.button(
@@ -31,7 +24,6 @@ class ApplyButton(discord.ui.View):
         guild = interaction.guild
         member = interaction.user
 
-
         if guild is None:
 
             await interaction.response.send_message(
@@ -40,6 +32,21 @@ class ApplyButton(discord.ui.View):
             )
             return
 
+
+        config = load_config()
+
+        application_category_id = config.get(
+            "application_category"
+        )
+
+        application_staff_role_id = config.get(
+            "application_staff_role"
+        )
+
+        ticket_roles = config.get(
+            "ticket_roles",
+            []
+        )
 
 
         channel_name = (
@@ -64,14 +71,12 @@ class ApplyButton(discord.ui.View):
             return
 
 
-
         category = guild.get_channel(
-            APPLICATION_CATEGORY_ID
+            application_category_id
         )
 
-
         staff_role = guild.get_role(
-            APPLICATION_STAFF_ROLE_ID
+            application_staff_role_id
         )
 
 
@@ -93,24 +98,12 @@ class ApplyButton(discord.ui.View):
             return
 
 
-
-        # Load extra ticket access roles
-        config = load_config()
-
-        ticket_roles = config.get(
-            "ticket_roles",
-            []
-        )
-
-
-
         overwrites = {
 
             guild.default_role:
                 discord.PermissionOverwrite(
                     view_channel=False
                 ),
-
 
             member:
                 discord.PermissionOverwrite(
@@ -119,8 +112,6 @@ class ApplyButton(discord.ui.View):
                     read_message_history=True
                 ),
 
-
-            # Main ping staff role also gets access
             staff_role:
                 discord.PermissionOverwrite(
                     view_channel=True,
@@ -130,8 +121,6 @@ class ApplyButton(discord.ui.View):
         }
 
 
-
-        # Add extra roles from JSON
         for role_id in ticket_roles:
 
             role = guild.get_role(role_id)
@@ -143,7 +132,6 @@ class ApplyButton(discord.ui.View):
                     send_messages=True,
                     read_message_history=True
                 )
-
 
 
         try:
@@ -164,12 +152,10 @@ class ApplyButton(discord.ui.View):
             return
 
 
-
         await interaction.response.send_message(
             f"✅ Your application has been created: {channel.mention}",
             ephemeral=True
         )
-
 
 
         embed = discord.Embed(
@@ -201,12 +187,11 @@ class ApplyButton(discord.ui.View):
         )
 
 
-
-        # Only APPLICATION_STAFF_ROLE_ID is pinged
+        # Only the configured staff role is pinged.
         await channel.send(
             content=(
                 f"{member.mention} "
-                f"<@&{APPLICATION_STAFF_ROLE_ID}>"
+                f"<@&{application_staff_role_id}>"
             ),
             embed=embed
         )
