@@ -1,0 +1,39 @@
+{
+    "main_welcome_channel": 1531434409641775116,
+    "fa_welcome_channel": 1531434469863719054,
+    "verify_channel": 1531430688539017399,
+    "info_channel": 1531430706641637506,
+    "apply_channel": 1531435908685893682,
+    "locutus_user": 672237266940198960,
+    "fa_contact": 776391819864047627,
+    "main_server_id": 1531430628598222930,
+    "fa_server_id": 1531430628598222930,
+    "application_category": 1531430816092131590,
+    "application_staff_role": 1531434582547763443,
+    "member_role": 1531434527161974804,
+    "embassy_category": 1531431008635981995,
+    "embassy_staff_role": 1531434652789641217,
+    "welcome_logo": "https://cdn.discordapp.com/icons/926310270069006436/0ad9d42b9f4a5845ed7e1d38ff69f250.png",
+    "welcome_banner": "https://media.tenor.com/vhzGqcwfGl0AAAAd/dragon-blade-roman-empire.gif",
+    "reaction_roles": {
+        "1531438999087087837": {
+            "channel_id": 1531430629261185226,
+            "roles": {
+                "💚": 1531434731865116842,
+                "💜": 1531434582547763443,
+                "❤️": 1531434527161974804,
+                "🧡": 1531434652789641217
+            }
+        }
+    },
+    "giveaways": {
+        "default_emoji": "🎉",
+        "allow_leave": true,
+        "ignore_bots": true,
+        "embed_color": 16766720
+    },
+    "reminders": [],
+    "ticket_roles": [
+        1531434731865116842
+    ]
+}

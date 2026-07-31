@@ -16,5 +16,4 @@ __pycache__/
 *.log
 
 # Data
-data/*.json
 !data/.gitkeep
