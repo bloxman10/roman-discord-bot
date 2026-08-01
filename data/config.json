@@ -1,22 +1,22 @@
 {
     "main_welcome_channel": 1531434409641775116,
     "fa_welcome_channel": 1531434469863719054,
-    "verify_channel": 1531430688539017399,
-    "info_channel": 1531430706641637506,
-    "apply_channel": 1531435908685893682,
+    "verify_channel": 1070425814996369499,
+    "info_channel": 1110040353823785021,
+    "apply_channel": 1129890595582791843,
     "locutus_user": 672237266940198960,
     "fa_contact": 776391819864047627,
     "main_server_id": 1531430628598222930,
     "fa_server_id": 1531430628598222930,
-    "application_category": 1531430816092131590,
-    "application_staff_role": 1531434582547763443,
-    "member_role": 1531434527161974804,
-    "embassy_category": 1531431008635981995,
-    "embassy_staff_role": 1531434652789641217,
+    "application_category": 1070423599464325281,
+    "application_staff_role": 944281042825654332,
+    "member_role": 926326709987446844,
+    "embassy_category": 1533129729283199006,
+    "embassy_staff_role": 1087086043649556661,
     "welcome_logo": "https://cdn.discordapp.com/icons/926310270069006436/0ad9d42b9f4a5845ed7e1d38ff69f250.png",
     "welcome_banner": "https://media.tenor.com/vhzGqcwfGl0AAAAd/dragon-blade-roman-empire.gif",
-    "fa_verify_channel":1533125420000481414,
-    "open_ticket_channel":1531437962322247770,
+    "fa_verify_channel":1088100013462261811,
+    "open_ticket_channel":1533130033823219712,
     "reaction_roles": {
         "1531438999087087837": {
             "channel_id": 1531430629261185226,
@@ -36,6 +36,6 @@
     },
     "reminders": [],
     "ticket_roles": [
-        1531434731865116842
+        926330527374508052
     ]
 }
