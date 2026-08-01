@@ -12,7 +12,6 @@ class FAWelcome(commands.Cog):
         self.bot = bot
 
 
-
     @app_commands.command(
         name="setup_fawelcome",
         description="Set the Foreign Affairs welcome channel"
@@ -33,12 +32,10 @@ class FAWelcome(commands.Cog):
 
         save_config(config)
 
-
         await interaction.response.send_message(
             f"✅ Foreign Affairs welcome channel set to {channel.mention}",
             ephemeral=True
         )
-
 
 
     @commands.Cog.listener()
@@ -49,45 +46,65 @@ class FAWelcome(commands.Cog):
 
         config = load_config()
 
-
         # Only allow FA server to trigger this welcome
         if member.guild.id != config.get("fa_server_id"):
             return
-
 
 
         channel_id = config.get(
             "fa_welcome_channel"
         )
 
-
         if not channel_id:
             return
-
 
 
         channel = self.bot.get_channel(
             channel_id
         )
 
-
         if channel is None:
             return
 
+
+        # Separate FA verify channel
+        fa_verify_channel = config.get(
+            "fa_verify_channel"
+        )
+
+        # Open ticket channel
+        open_ticket_channel = config.get(
+            "open_ticket_channel"
+        )
+
+        # Bloxman
+        fa_contact = config.get(
+            "fa_contact"
+        )
+
+        if not fa_verify_channel or not open_ticket_channel:
+            print(
+                "❌ FA welcome is missing fa_verify_channel "
+                "or open_ticket_channel in config.json"
+            )
+            return
 
 
         embed = discord.Embed(
             description=(
                 "**Welcome!**\n\n"
-                "Welcome to the **Empire of the Romans Foreign Affairs** server.\n\n"
 
-                "If you are here for diplomacy, treaty discussions, embassies, "
-                "or other diplomatic matters, our Foreign Affairs team will assist you shortly.\n\n"
+                "Welcome to the **Roman FA server!** "
+                f"First please go to <#{fa_verify_channel}> "
+                f"and register with <@{config['locutus_user']}>.\n\n"
 
-                "To contact us, please create an embassy using the embassy button "
-                "or wait for a member of the FA team.\n\n"
+                "After doing that, please open a ticket in "
+                f"<#{open_ticket_channel}>, "
+                f"or DM <@{fa_contact}>.\n\n"
 
-                "Ave Roma!"
+                "You will be added to your embassy shortly after that.\n\n"
+
+                "Thanks!"
             ),
             color=discord.Color.blue()
         )
@@ -118,7 +135,6 @@ class FAWelcome(commands.Cog):
             content=member.mention,
             embed=embed
         )
-
 
 
 async def setup(bot):
